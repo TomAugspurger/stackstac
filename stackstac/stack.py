@@ -277,6 +277,14 @@ def stack(
         bounds_latlon=bounds_latlon,
         snap_bounds=snap_bounds,
     )
+    coords = to_coords(plain_items,
+            asset_ids,
+            spec,
+            xy_coords=xy_coords,
+            properties=properties,
+            band_coords=band_coords)
+
+
     arr = items_to_dask(
         asset_table,
         spec,
@@ -288,17 +296,9 @@ def stack(
         reader=reader,
         gdal_env=gdal_env,
     )
-
     return xr.DataArray(
         arr,
-        *to_coords(
-            plain_items,
-            asset_ids,
-            spec,
-            xy_coords=xy_coords,
-            properties=properties,
-            band_coords=band_coords,
-        ),
+        *coords,
         attrs=to_attrs(spec),
         name="stackstac-" + dask.base.tokenize(arr)
     )
