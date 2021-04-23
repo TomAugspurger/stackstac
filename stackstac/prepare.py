@@ -452,6 +452,8 @@ def to_coords(
         #             "time", [item["properties"].get(prop) for item in items]
         #         )
 
+    # so eo is currently a dict. We're changing it to a List[Dict]
+    # Then eo_by_asset goes from a List[Dict] to List[List[Dict]]
     if band_coords:
         flattened_metadata_by_asset = [
             accumulate_metadata.accumulate_metadata(
@@ -467,13 +469,7 @@ def to_coords(
             # NOTE: we look for `eo:bands` in each Asset's metadata, not as an Item-level list.
             # This only became available in STAC 1.0.0-beta.1, so we'll fail on older collections.
             # See https://github.com/radiantearth/stac-spec/tree/master/extensions/eo#item-fields
-            eo = meta.pop("eo:bands", {})
-            if isinstance(eo, list):
-                eo = eo[0] if len(eo) == 1 else {}
-                # ^ `eo:bands` should be a list when present, but >1 item means it's probably a multi-band asset,
-                # which we can't currently handle, so we ignore it. we don't error here, because
-                # as long as you don't actually _use_ that asset, everything will be fine. we could
-                # warn, but that would probably just get annoying.
+            eo = meta.pop("eo:bands", [{}])
             eo_by_asset.append(eo)
             try:
                 meta["polarization"] = meta.pop("sar:polarizations")
